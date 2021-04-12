@@ -1,11 +1,10 @@
 package com.proposta.propostaservice.proposta;
 
 import com.proposta.propostaservice.annotation.CPFOrCNPJ;
+import com.proposta.propostaservice.handler.ErroApiException;
+import org.springframework.http.HttpStatus;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
+import javax.validation.constraints.*;
 import java.math.BigDecimal;
 
 public class PropostaRequest {
@@ -24,7 +23,7 @@ public class PropostaRequest {
     private String endereco;
 
     @NotNull
-    @Positive
+    @PositiveOrZero
     private BigDecimal salario;
 
     public PropostaRequest(@NotNull String documento, @NotBlank @Email String email, @NotBlank String nome, @NotBlank String endereco, @NotNull BigDecimal salario) {
@@ -40,6 +39,7 @@ public class PropostaRequest {
      * @return A proposta com os dados do dto
      */
     public Proposta toProposta(){
+        documento = documento.replace(".","").replace("-","");
         return new Proposta(documento,email,nome,endereco,salario);
     }
 }

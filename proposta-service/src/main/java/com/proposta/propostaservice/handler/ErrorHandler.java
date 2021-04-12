@@ -8,6 +8,7 @@ import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
@@ -17,6 +18,13 @@ import java.util.List;
 
 @RestControllerAdvice
 public class ErrorHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(ErroApiException.class)
+    public ResponseEntity<Object> handleErroApiException(ErroApiException ex){
+        ErrorDto erro = new ErrorDto(ex);
+        return ResponseEntity.status(ex.getStatus()).body(erro);
+    }
+
     @Override
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
         return new ResponseEntity<>(buildErrorList(ex,status),status);
@@ -33,13 +41,15 @@ public class ErrorHandler extends ResponseEntityExceptionHandler {
         List<FieldError> fieldErrors = ex.getBindingResult().getFieldErrors();
 
         globalErrors.forEach(
-                e -> errors.add(new ErrorDto(e.getObjectName(), e.getDefaultMessage(), status.value()))
+                e -> errors.add(new ErrorDto(e.getObjectName(), e.getDefaultMessage(), status))
         );
 
         fieldErrors.forEach(
-                e -> errors.add(new ErrorDto(e.getField(), e.getDefaultMessage(), status.value()))
+                e -> errors.add(new ErrorDto(e.getField(), e.getDefaultMessage(), status))
         );
 
         return errors;
     }
+
+
 }

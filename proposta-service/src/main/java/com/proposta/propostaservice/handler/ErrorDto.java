@@ -1,9 +1,13 @@
 package com.proposta.propostaservice.handler;
 
-public class ErrorDto {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.springframework.http.HttpStatus;
+
+public class ErrorDto{
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private String field;
     private String message;
-    private Integer statusCode;
+    private HttpStatus statusCode;
 
     public String getField() {
         return field;
@@ -13,16 +17,19 @@ public class ErrorDto {
         return message;
     }
 
-    public Integer getStatusCode() {
+    public HttpStatus getStatusCode() {
         return statusCode;
     }
 
-    public ErrorDto(String field, String message, Integer statusCode) {
+    public ErrorDto(String field, String message, HttpStatus statusCode) {
         this.field = field;
         this.message = message;
         this.statusCode = statusCode;
     }
 
-    public ErrorDto() {
+    public ErrorDto(ErroApiException ex) {
+        this.field = ex.getField();
+        this.message = ex.getReason();
+        this.statusCode = ex.getStatus();
     }
 }
