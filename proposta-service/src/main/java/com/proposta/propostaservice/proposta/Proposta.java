@@ -1,12 +1,8 @@
 package com.proposta.propostaservice.proposta;
 
-import com.proposta.propostaservice.annotation.CPFOrCNPJ;
+import com.proposta.propostaservice.solicitante.StatusProposta;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 @Entity
@@ -30,6 +26,9 @@ public class Proposta {
     @Column(nullable = false)
     private BigDecimal salario;
 
+    @Enumerated(EnumType.STRING)
+    private StatusProposta statusProposta;
+
     public Long getId() {
         return id;
     }
@@ -46,6 +45,22 @@ public class Proposta {
         return nome;
     }
 
+    public String getEndereco() {
+        return endereco;
+    }
+
+    public BigDecimal getSalario() {
+        return salario;
+    }
+
+    public StatusProposta getStatusProposta() {
+        return statusProposta;
+    }
+
+    public void statusValido() {
+        this.statusProposta = StatusProposta.ELEGIVEL;
+    }
+
     /**
      *
      * @param documento CPF ou CNPJ em formato de String
@@ -60,6 +75,7 @@ public class Proposta {
         this.nome = nome;
         this.endereco = endereco;
         this.salario = salario;
+        this.statusProposta = StatusProposta.NAO_ELEGIVEL;
     }
 
     /**

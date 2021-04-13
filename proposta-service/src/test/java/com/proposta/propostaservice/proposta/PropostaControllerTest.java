@@ -1,67 +1,111 @@
 package com.proposta.propostaservice.proposta;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.proposta.propostaservice.handler.ErroApiException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
+import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.util.UriComponentsBuilder;
+import com.proposta.propostaservice.solicitante.StatusProposta;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.event.annotation.AfterTestExecution;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-@ExtendWith(SpringExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PropostaControllerTest {
-    @InjectMocks
-    private PropostaController controller;
+    @Autowired
+    private MockMvc mvc;
 
-    @Mock
-    private PropostaRepository propostaRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    @BeforeEach
-    public void setUp(){
-        when(propostaRepository.existsByDocumento("027.294.610-94")).thenReturn(true);
+    @ParameterizedTest
+    @MethodSource("provideValuesForTestElegivelRequest")
+    @DisplayName("Se o documento não tiver sido associado a uma proposta e não começar com 3")
+    @Order(1)
+    public void TesteDocumentoElegivel(String documento, String email, String nome, String endereco,
+                                       BigDecimal salario) throws Exception {
+
+        String request = getRequestInJsonFormat(documento, email, nome, endereco, salario);
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/propostas").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(request))
+                .andExpect(status().isCreated()).andReturn();
+
+        String contentAsString = result.getResponse().getContentAsString();
+        PropostaResponse propostaResponse = objectMapper.readValue(contentAsString, PropostaResponse.class);
+        assertEquals(StatusProposta.ELEGIVEL, propostaResponse.getStatus());
     }
 
-    @Test
-    @DisplayName("Se o documento já estiver cadastrado no banco de dados lança uma exceção")
-    public void seDocumentoJaEstaCadastradoRetornaUmaException() {
-        PropostaRequest propostaRequest = new PropostaRequest("027.294.610-94",
-                "google@example.org", "Google", "Endereco", BigDecimal.valueOf(42L));
+    @ParameterizedTest
+    @MethodSource("provideValuesForTestNaoElegivelRequest")
+    @DisplayName("Se o documento não tiver sido associado a uma proposta e começar com 3")
+    @Order(2)
+    public void TesteDocumentoNaoElegivel(String documento, String email, String nome,
+                                          String endereco, BigDecimal salario) throws Exception {
 
-        assertThrows(ErroApiException.class,
-                () -> controller.enviaProposta(propostaRequest, UriComponentsBuilder.newInstance()));
+        String request = getRequestInJsonFormat(documento, email, nome, endereco, salario);
+
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.post("/propostas").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(request))
+                .andExpect(status().isCreated()).andReturn();
+
+        String contentAsString = result.getResponse().getContentAsString();
+        PropostaResponse propostaResponse = objectMapper.readValue(contentAsString, PropostaResponse.class);
+        assertEquals(StatusProposta.NAO_ELEGIVEL, propostaResponse.getStatus());
     }
 
-    @Test
-    @DisplayName("Se o documento não estiver cadastrado não lança uma exceção")
-    public void seDocumentoNaoEstaCadastradoRetornaProposta() {
-        PropostaRequest propostaRequest = new PropostaRequest("100.200.610-94",
-                "robot@example.org", "Robot", "Endereco", BigDecimal.valueOf(42L));
+    @ParameterizedTest
+    @AfterTestExecution
+    @MethodSource("provideValuesForTestElegivelRequest")
+    @DisplayName("Documento igual")
+    @Order(3)
+    public void TesteDocumentoIgual(String documento, String email, String nome, String endereco,
+                                    BigDecimal salario) throws Exception {
 
-        ResponseEntity<PropostaResponse> propostaResult = controller.enviaProposta(propostaRequest,
-                UriComponentsBuilder.newInstance());
+        String request = getRequestInJsonFormat(documento, email, nome, endereco, salario);
 
-        assertEquals(HttpStatus.CREATED, propostaResult.getStatusCode());
-        assertTrue(propostaResult.hasBody());
-        PropostaResponse body = propostaResult.getBody();
-        assertEquals("Robot", body.getNome());
-        assertNull(body.getId());
+        mvc.perform(MockMvcRequestBuilders.post("/propostas").accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON).content(request))
+                .andExpect(status().isUnprocessableEntity());
+    }
+
+    public String getRequestInJsonFormat(String documento, String email, String nome,
+                                         String endereco, BigDecimal salario) {
+        return "{\n" +
+                "    \"documento\":\"" + documento + "\",\n" +
+                "    \"email\":\"" + email + "\",\n" +
+                "    \"nome\":\"" + nome + "\",\n" +
+                "    \"endereco\":\"" + endereco + "\",\n" +
+                "    \"salario\":" + salario + "\n" +
+                "}";
+    }
+
+    private static Stream<Arguments> provideValuesForTestElegivelRequest() {
+        return Stream.of(
+                Arguments.of("430.886.770-39", "email@email.com", "nome", "endereco", BigDecimal.valueOf(1)),
+                Arguments.of("982.719.320-12", "xp@xp.com", "name", "adress", BigDecimal.valueOf(10))
+        );
+    }
+
+    private static Stream<Arguments> provideValuesForTestNaoElegivelRequest() {
+        return Stream.of(
+                Arguments.of("315.271.350-98", "email@email.com", "nome", "endereco", BigDecimal.valueOf(1)),
+                Arguments.of("310.552.550-52", "xp@xp.com", "name", "adress", BigDecimal.valueOf(10))
+        );
     }
 }
 

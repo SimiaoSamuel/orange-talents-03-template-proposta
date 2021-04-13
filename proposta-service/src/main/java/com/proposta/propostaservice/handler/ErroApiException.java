@@ -19,6 +19,12 @@ public class ErroApiException extends RuntimeException{
         return status;
     }
 
+    /**
+     *
+     * @param field  campo que aconteceu o erro, caso não tenha um especifico é nulo
+     * @param reason  motivo da exceção
+     * @param status  status que vai retornar na resposta
+     */
     public ErroApiException(String field, String reason, HttpStatus status) {
         this.field = field;
         this.reason = reason;
