@@ -4,7 +4,7 @@ import com.proposta.propostaservice.proposta.Proposta;
 
 import javax.validation.constraints.NotBlank;
 
-public class RequestSolicitacaoCartao {
+public class SolicitacaoCartaoRequest {
     @NotBlank
     private String documento;
     @NotBlank
@@ -28,7 +28,7 @@ public class RequestSolicitacaoCartao {
      *
      * @param proposta  proposta que você vai enviar para fazer a solicitação do cartão
      */
-    public RequestSolicitacaoCartao(Proposta proposta) {
+    public SolicitacaoCartaoRequest(Proposta proposta) {
         this.documento = proposta.getDocumento();
         this.nome = proposta.getNome();
         this.idProposta = proposta.getId().toString();

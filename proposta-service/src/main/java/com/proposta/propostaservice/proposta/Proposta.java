@@ -1,6 +1,6 @@
 package com.proposta.propostaservice.proposta;
 
-import com.proposta.propostaservice.solicitante.StatusProposta;
+import com.proposta.propostaservice.cartao.Cartao;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -28,6 +28,14 @@ public class Proposta {
 
     @Enumerated(EnumType.STRING)
     private StatusProposta statusProposta;
+
+    @ManyToOne
+    private Cartao cartao;
+
+    public void adicionaCartao(Cartao cartao) {
+        this.cartao = cartao;
+        this.statusProposta = StatusProposta.CARTAO_ATRELADO;
+    }
 
     public Long getId() {
         return id;

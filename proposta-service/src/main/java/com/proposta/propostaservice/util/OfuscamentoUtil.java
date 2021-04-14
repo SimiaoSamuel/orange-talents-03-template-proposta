@@ -2,7 +2,7 @@ package com.proposta.propostaservice.util;
 
 import java.util.Collections;
 
-public class OfuscamentoUtil {
+public abstract class OfuscamentoUtil {
     /**
      *
      * @param dadoSensivel - Informação que você quer ofuscar no formato de String

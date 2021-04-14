@@ -1,8 +1,8 @@
 package com.proposta.propostaservice.proposta;
 
 import com.proposta.propostaservice.handler.ErroApiException;
-import com.proposta.propostaservice.solicitante.RequestSolicitacaoCartao;
-import com.proposta.propostaservice.solicitante.ResponseSolicitacaoCartao;
+import com.proposta.propostaservice.solicitante.SolicitacaoCartaoRequest;
+import com.proposta.propostaservice.solicitante.RestricaoCartaoResponse;
 import com.proposta.propostaservice.solicitante.RestricaoCartaoFeign;
 import com.proposta.propostaservice.util.OfuscamentoUtil;
 import feign.FeignException;
@@ -10,38 +10,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/propostas")
+@EnableScheduling
 public class PropostaController {
 
     private final Logger LOG = LoggerFactory.getLogger(PropostaController.class);
     private final RestricaoCartaoFeign restricaoCartaoFeign;
-    private final ExecutorTransacao executorTransacao;
+    private final PropostaTransacao propostaTransacao;
 
-    public PropostaController(RestricaoCartaoFeign restricaoCartaoFeign, ExecutorTransacao executorTransacao) {
+    public PropostaController(RestricaoCartaoFeign restricaoCartaoFeign, PropostaTransacao executorTransacao) {
         this.restricaoCartaoFeign = restricaoCartaoFeign;
-        this.executorTransacao = executorTransacao;
+        this.propostaTransacao = executorTransacao;
     }
 
     @PostMapping
     public ResponseEntity<PropostaResponse> enviaProposta(@RequestBody @Valid PropostaRequest propostaRequest, UriComponentsBuilder uriBuilder){
         Proposta proposta = propostaRequest.toProposta();
-        Boolean existeDocumentoIgual = executorTransacao.existsByDocumento(proposta.getDocumento());
+        Boolean existeDocumentoIgual = propostaTransacao.existsByDocumento(proposta.getDocumento());
 
         if(existeDocumentoIgual)
             throw new ErroApiException("documento","Esse documento já está cadastrado em uma proposta",
                     HttpStatus.UNPROCESSABLE_ENTITY);
 
-        executorTransacao.save(proposta);
+        propostaTransacao.save(proposta);
         solicitacaoParaValidarDados(proposta);
 
         String emailOfuscado = OfuscamentoUtil.Ofuscar(proposta.getEmail());
@@ -55,14 +55,22 @@ public class PropostaController {
         return ResponseEntity.created(uri).body(propostaResponse);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Proposta> buscarProposta(@PathVariable Long id){
+        Optional<Proposta> proposta = propostaTransacao.findPropostaById(id);
+        if(proposta.isEmpty())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok(proposta.get());
+    }
+
     public void solicitacaoParaValidarDados(Proposta proposta){
-        RequestSolicitacaoCartao requestCartao = new RequestSolicitacaoCartao(proposta);
+        SolicitacaoCartaoRequest requestCartao = new SolicitacaoCartaoRequest(proposta);
         try {
-            ResponseSolicitacaoCartao dadosCartao = restricaoCartaoFeign.retornaDadosSolicitante(requestCartao);
+            RestricaoCartaoResponse dadosCartao = restricaoCartaoFeign.retornaDadosSolicitante(requestCartao);
             proposta.statusValido();
-            executorTransacao.save(proposta);
-        }
-        catch (FeignException e){
+            propostaTransacao.save(proposta);
+        } catch (FeignException e){
             LOG.error("[{}] during [POST] to [http://localhost:9999/api/solicitacao]",e.status());
             LOG.warn("O estado dessa proposta é NÃO_ELEGÍVEL");
         }

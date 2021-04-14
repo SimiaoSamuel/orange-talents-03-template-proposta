@@ -1,7 +1,5 @@
 package com.proposta.propostaservice.proposta;
 
-import com.proposta.propostaservice.solicitante.StatusProposta;
-
 import java.math.BigDecimal;
 
 public class PropostaResponse {
