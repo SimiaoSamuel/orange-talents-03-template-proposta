@@ -35,7 +35,7 @@ public class PropostaControllerTest {
     @MethodSource("provideValuesForTestElegivelRequest")
     @DisplayName("Se o documento não tiver sido associado a uma proposta e não começar com 3")
     @Order(1)
-    public void TesteDocumentoElegivel(String documento, String email, String nome, String endereco,
+    public void testeDocumentoElegivel(String documento, String email, String nome, String endereco,
                                        BigDecimal salario) throws Exception {
 
         String request = getRequestInJsonFormat(documento, email, nome, endereco, salario);
@@ -53,7 +53,7 @@ public class PropostaControllerTest {
     @MethodSource("provideValuesForTestNaoElegivelRequest")
     @DisplayName("Se o documento não tiver sido associado a uma proposta e começar com 3")
     @Order(2)
-    public void TesteDocumentoNaoElegivel(String documento, String email, String nome,
+    public void testeDocumentoNaoElegivel(String documento, String email, String nome,
                                           String endereco, BigDecimal salario) throws Exception {
 
         String request = getRequestInJsonFormat(documento, email, nome, endereco, salario);
@@ -68,11 +68,10 @@ public class PropostaControllerTest {
     }
 
     @ParameterizedTest
-    @AfterTestExecution
     @MethodSource("provideValuesForTestElegivelRequest")
     @DisplayName("Documento igual")
     @Order(3)
-    public void TesteDocumentoIgual(String documento, String email, String nome, String endereco,
+    public void testeDocumentoIgual(String documento, String email, String nome, String endereco,
                                     BigDecimal salario) throws Exception {
 
         String request = getRequestInJsonFormat(documento, email, nome, endereco, salario);
@@ -80,6 +79,22 @@ public class PropostaControllerTest {
         mvc.perform(MockMvcRequestBuilders.post("/propostas").accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON).content(request))
                 .andExpect(status().isUnprocessableEntity());
+    }
+
+    @Test
+    @DisplayName("retorna proposta se existir uma")
+    @Order(4)
+    public void retornaPropostaSeExistir() throws Exception {
+        mvc.perform(MockMvcRequestBuilders.get("/propostas/1"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("não retorna proposta se não existir uma")
+    @Order(5)
+    public void naoRetornaPropostaSeNaoExistir() throws Exception {
+        MvcResult result = mvc.perform(MockMvcRequestBuilders.get("/propostas/1000"))
+                .andExpect(status().isNotFound()).andReturn();
     }
 
     public String getRequestInJsonFormat(String documento, String email, String nome,

@@ -56,12 +56,13 @@ public class PropostaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Proposta> buscarProposta(@PathVariable Long id){
+    public ResponseEntity<PropostaResponse> buscarProposta(@PathVariable Long id){
         Optional<Proposta> proposta = propostaTransacao.findPropostaById(id);
         if(proposta.isEmpty())
             throw new ErroApiException(null,"Não há nenhum recurso para essa url",HttpStatus.NOT_FOUND);
 
-        return ResponseEntity.ok(proposta.get());
+        PropostaResponse propostaResponse = new PropostaResponse(proposta.get());
+        return ResponseEntity.ok(propostaResponse);
     }
 
     public void solicitacaoParaValidarDados(Proposta proposta){

@@ -32,11 +32,11 @@ public class ProcessadorTeste {
         Long id = propostaResponsePost.getBody().getId();
 
         processadorScheduled.gerarCartao();
-        ResponseEntity<Proposta> propostaResponseEntity = propostaController.buscarProposta(id);
-        Proposta proposta = propostaResponseEntity.getBody();
+        ResponseEntity<PropostaResponse> propostaResponseEntity = propostaController.buscarProposta(id);
+        PropostaResponse proposta = propostaResponseEntity.getBody();
 
         assertNotNull(proposta);
-        assertEquals(StatusProposta.CARTAO_ATRELADO,proposta.getStatusProposta());
+        assertEquals(StatusProposta.CARTAO_ATRELADO,proposta.getStatus());
     }
 
     @Test
@@ -50,10 +50,10 @@ public class ProcessadorTeste {
         Long id = Objects.requireNonNull(propostaResponsePost.getBody()).getId();
 
         processadorScheduled.gerarCartao();
-        ResponseEntity<Proposta> propostaResponseEntity = propostaController.buscarProposta(id);
-        Proposta proposta = propostaResponseEntity.getBody();
+        ResponseEntity<PropostaResponse> propostaResponseEntity = propostaController.buscarProposta(id);
+        PropostaResponse proposta = propostaResponseEntity.getBody();
 
         assertNotNull(proposta);
-        assertEquals(StatusProposta.NAO_ELEGIVEL,proposta.getStatusProposta());
+        assertEquals(StatusProposta.NAO_ELEGIVEL,proposta.getStatus());
     }
 }
