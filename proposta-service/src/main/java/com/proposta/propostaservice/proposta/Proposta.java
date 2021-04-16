@@ -37,6 +37,10 @@ public class Proposta {
         this.statusProposta = StatusProposta.CARTAO_ATRELADO;
     }
 
+    public Cartao getCartao() {
+        return cartao;
+    }
+
     public Long getId() {
         return id;
     }

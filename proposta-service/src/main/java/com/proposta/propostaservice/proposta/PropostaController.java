@@ -1,5 +1,6 @@
 package com.proposta.propostaservice.proposta;
 
+import com.proposta.propostaservice.biometria.ExecutorTransacao;
 import com.proposta.propostaservice.handler.ErroApiException;
 import com.proposta.propostaservice.solicitante.SolicitacaoCartaoRequest;
 import com.proposta.propostaservice.solicitante.RestricaoCartaoResponse;
@@ -25,23 +26,26 @@ public class PropostaController {
 
     private final Logger LOG = LoggerFactory.getLogger(PropostaController.class);
     private final RestricaoCartaoFeign restricaoCartaoFeign;
-    private final PropostaTransacao propostaTransacao;
+    private final PropostaRepository propostaRepository;
+    private final ExecutorTransacao transacao;
 
-    public PropostaController(RestricaoCartaoFeign restricaoCartaoFeign, PropostaTransacao executorTransacao) {
+    public PropostaController(RestricaoCartaoFeign restricaoCartaoFeign, PropostaRepository propostaRepository,
+                              ExecutorTransacao transacao) {
         this.restricaoCartaoFeign = restricaoCartaoFeign;
-        this.propostaTransacao = executorTransacao;
+        this.propostaRepository = propostaRepository;
+        this.transacao = transacao;
     }
 
     @PostMapping
     public ResponseEntity<PropostaResponse> enviaProposta(@RequestBody @Valid PropostaRequest propostaRequest, UriComponentsBuilder uriBuilder){
         Proposta proposta = propostaRequest.toProposta();
-        Boolean existeDocumentoIgual = propostaTransacao.existsByDocumento(proposta.getDocumento());
+        Boolean existeDocumentoIgual = propostaRepository.existsByDocumento(proposta.getDocumento());
 
         if(existeDocumentoIgual)
             throw new ErroApiException("documento","Esse documento já está cadastrado em uma proposta",
                     HttpStatus.UNPROCESSABLE_ENTITY);
 
-        propostaTransacao.save(proposta);
+        transacao.salvaEComita(proposta);
         solicitacaoParaValidarDados(proposta);
 
         String emailOfuscado = OfuscamentoUtil.Ofuscar(proposta.getEmail());
@@ -57,7 +61,7 @@ public class PropostaController {
 
     @GetMapping("/{id}")
     public ResponseEntity<PropostaResponse> buscarProposta(@PathVariable Long id){
-        Optional<Proposta> proposta = propostaTransacao.findPropostaById(id);
+        Optional<Proposta> proposta = propostaRepository.findById(id);
         if(proposta.isEmpty())
             throw new ErroApiException(null,"Não há nenhum recurso para essa url",HttpStatus.NOT_FOUND);
 
@@ -70,7 +74,7 @@ public class PropostaController {
         try {
             RestricaoCartaoResponse dadosCartao = restricaoCartaoFeign.retornaDadosSolicitante(requestCartao);
             proposta.statusValido();
-            propostaTransacao.save(proposta);
+            transacao.atualizaEComita(proposta);
         } catch (FeignException e){
             LOG.error("[{}] during [POST] to [http://localhost:9999/api/solicitacao]",e.status());
             LOG.warn("O estado dessa proposta é NÃO_ELEGÍVEL");

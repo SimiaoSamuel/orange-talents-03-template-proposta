@@ -9,6 +9,7 @@ public class PropostaResponse {
     private StatusProposta status;
     private String email;
     private String endereco;
+    private String cartao;
 
     public Long getId() {
         return id;
@@ -30,6 +31,10 @@ public class PropostaResponse {
         return endereco;
     }
 
+    public String getCartao(){
+        return cartao;
+    }
+
     public StatusProposta getStatus() {
         return status;
     }
@@ -45,6 +50,8 @@ public class PropostaResponse {
         this.salario = proposta.getSalario();
         this.endereco = proposta.getEndereco();
         this.status = proposta.getStatusProposta();
+        if(proposta.getCartao() != null)
+            this.cartao = proposta.getCartao().getId();
     }
 
     /**
