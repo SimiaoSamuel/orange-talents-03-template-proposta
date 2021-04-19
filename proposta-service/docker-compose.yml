@@ -18,19 +18,21 @@ services:
     build: ./
     restart: on-failure
     ports:
-      - '8080:8080'
+      - '8081:8081'
     networks:
       - network-proposta
     depends_on:
       - db
       - contas
       - analise
+      - keycloak
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/proposta?createDatabaseIfNotExist=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
       CARTAO_ENDERECO: http://analise:9999
       CARTAO_CRIACAO: http://contas:8888
+      KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080/auth
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.2.1"
@@ -98,6 +100,7 @@ services:
       KEYCLOAK_USER: admin
       KEYCLOAK_PASSWORD: Pa55w0rd
       POSTGRES_PORT_5432_TCP_ADDR: 127.0.0.1
+      KEYCLOAK_FRONTEND_URL: http://keycloak:8080/auth
     networks:
       - network-proposta
 

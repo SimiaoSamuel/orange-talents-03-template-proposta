@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
  * Acesso a API externa para fazer a validação dos dados dá proposta e verificar se
  * o solicitante é elegível ou não a ter um cartão
  */
-@FeignClient(name = "restricao", url = "${cartao.endereco}")
+@FeignClient(name = "restricao", url = "${cartao.restricao}")
 public interface RestricaoCartaoFeign {
     @RequestMapping(method = RequestMethod.POST, value = "/api/solicitacao",
             consumes = "application/json")

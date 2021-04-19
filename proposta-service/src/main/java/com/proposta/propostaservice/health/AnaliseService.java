@@ -2,6 +2,7 @@ package com.proposta.propostaservice.health;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,8 @@ import java.net.URL;
 
 @Component
 public class AnaliseService implements HealthIndicator {
-    private static final String URI = "http://localhost:9999";
+    @Value(value = "${cartao.restricao}")
+    private String URI;
     private final Logger LOG = LoggerFactory.getLogger(AnaliseService.class);
 
     @Override

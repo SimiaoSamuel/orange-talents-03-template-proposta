@@ -19,12 +19,20 @@ public class Biometria {
 
     private LocalDateTime criadaEM;
 
+    /**
+     *
+     * @param fingerPrint String de biometria compatível com Base64
+     * @param cartao cartão a qual essa biometria vai ser relacionada
+     */
     public Biometria(String fingerPrint, Cartao cartao) {
         this.fingerPrint = fingerPrint;
         this.cartao = cartao;
         criadaEM = LocalDateTime.now().withNano(0);
     }
 
+    /**
+     * Hibernate Only
+     */
     @Deprecated
     public Biometria() {
     }

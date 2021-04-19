@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 public class BiometriaTest {
 
     @Autowired
@@ -44,6 +44,7 @@ public class BiometriaTest {
         String request = buildJsonRequest("c2FtdWVs");
         String cartao = getCartao();
         String url = "/cartoes/" + cartao + "/biometrias";
+
         mockMvc.perform(post(url)
                 .contentType(MediaType.APPLICATION_JSON).content(request))
                 .andExpect(status().isCreated())
