@@ -37,6 +37,15 @@ public class BloqueioTest {
 
     @Test
     @Order(1)
+    public void seCartaoValidoEstaComHeaderEmBrancoRetornaBadRequest() throws Exception {
+        String cartao = getCartao();
+        String resourceUri = "/cartoes/" + cartao + "/bloqueios";
+        mvc.perform(post(resourceUri))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @Order(2)
     public void seCartaoValidoNaoBloqueadoRetornaCreated() throws Exception {
         String cartao = getCartao();
         String resourceUri = "/cartoes/" + cartao + "/bloqueios";
@@ -46,7 +55,7 @@ public class BloqueioTest {
     }
 
     @Test
-    @Order(2)
+    @Order(3)
     public void seCartaoValidoEstaBloqueadoRetornaUnprocessable() throws Exception {
         String cartao = getCartao();
         String resourceUri = "/cartoes/" + cartao + "/bloqueios";

@@ -1,26 +1,22 @@
 package com.proposta.propostaservice.cartao.bloqueio;
 
-import javax.persistence.Column;
+import com.proposta.propostaservice.cartao.Cartao;
+
 import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
 
 public class BloqueioRequest {
-    @NotBlank
-    private String idCartao;
-
     @NotBlank
     private String ip;
 
     @NotBlank
     private String userAgent;
 
-    public BloqueioRequest(@NotBlank String idCartao, @NotBlank String ip, @NotBlank String userAgent) {
-        this.idCartao = idCartao;
+    public BloqueioRequest( @NotBlank String ip, @NotBlank String userAgent) {
         this.ip = ip;
         this.userAgent = userAgent;
     }
 
-    public BloqueioCartao toBloqueioCartao(){
-        return new BloqueioCartao(idCartao,ip,userAgent);
+    public BloqueioCartao toBloqueioCartao(Cartao cartao){
+        return new BloqueioCartao(cartao,ip,userAgent);
     }
 }

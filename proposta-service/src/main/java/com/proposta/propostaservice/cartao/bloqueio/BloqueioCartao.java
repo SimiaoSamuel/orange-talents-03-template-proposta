@@ -1,5 +1,7 @@
 package com.proposta.propostaservice.cartao.bloqueio;
 
+import com.proposta.propostaservice.cartao.Cartao;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
@@ -9,8 +11,8 @@ public class BloqueioCartao {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String idCartao;
+    @ManyToOne
+    private Cartao cartao;
 
     @Column(nullable = false)
     private LocalDateTime instanteBloqueio;
@@ -25,8 +27,14 @@ public class BloqueioCartao {
         return id;
     }
 
-    public BloqueioCartao(String idCartao, String ip, String userAgent) {
-        this.idCartao = idCartao;
+    /**
+     *
+     * @param cartao cartao que vai ser bloqueado
+     * @param ip ip do usuario
+     * @param userAgent agente da requisição
+     */
+    public BloqueioCartao(Cartao cartao, String ip, String userAgent) {
+        this.cartao = cartao;
         this.instanteBloqueio = LocalDateTime.now();
         this.ip = ip;
         this.userAgent = userAgent;

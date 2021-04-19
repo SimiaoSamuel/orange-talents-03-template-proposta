@@ -1,8 +1,6 @@
 package com.proposta.propostaservice.proposta;
 
 import com.proposta.propostaservice.annotation.CPFOrCNPJ;
-import com.proposta.propostaservice.handler.ErroApiException;
-import org.springframework.http.HttpStatus;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
