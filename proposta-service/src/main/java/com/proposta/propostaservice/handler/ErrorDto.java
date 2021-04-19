@@ -6,7 +6,10 @@ import org.springframework.http.HttpStatus;
 public class ErrorDto{
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private String field;
+
     private String message;
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private HttpStatus statusCode;
 
     public String getField() {

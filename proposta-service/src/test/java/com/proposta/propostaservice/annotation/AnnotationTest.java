@@ -1,12 +1,9 @@
 package com.proposta.propostaservice.annotation;
 
-import com.proposta.propostaservice.biometria.BiometriaRequest;
+import com.proposta.propostaservice.cartao.biometria.BiometriaRequest;
 import com.proposta.propostaservice.proposta.PropostaRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -16,7 +13,6 @@ import org.springframework.validation.beanvalidation.SpringConstraintValidatorFa
 import javax.validation.ConstraintViolation;
 import java.math.BigDecimal;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,4 +1,4 @@
-package com.proposta.propostaservice.biometria;
+package com.proposta.propostaservice.cartao.biometria;
 
 import com.proposta.propostaservice.cartao.Cartao;
 import com.proposta.propostaservice.cartao.CartaoRepository;
@@ -13,7 +13,7 @@ import java.net.URI;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/cartoes/{id}/biometrias")
+@RequestMapping("/cartoes/{idCartao}/biometrias")
 public class BiometriaController {
 
    private final CartaoRepository cartaoRepository;
@@ -25,9 +25,9 @@ public class BiometriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> salvarBiometria(@PathVariable String id, @RequestBody @Valid BiometriaRequest biometriaRequest,
+    public ResponseEntity<Void> salvarBiometria(@PathVariable String idCartao, @RequestBody @Valid BiometriaRequest biometriaRequest,
                                                   UriComponentsBuilder uriBuilder){
-        Optional<Cartao> cartao = cartaoRepository.findById(id);
+        Optional<Cartao> cartao = cartaoRepository.findById(idCartao);
         if(cartao.isEmpty())
             throw new ErroApiException(null,"cartão não encontrado", HttpStatus.NOT_FOUND);
 
@@ -35,7 +35,7 @@ public class BiometriaController {
         transacao.salvaEComita(biometria);
 
         URI uri = uriBuilder.path("/cartoes/{idCartao}/biometrias/{id}")
-                .buildAndExpand(id,biometria.getId()).toUri();
+                .buildAndExpand(idCartao,biometria.getId()).toUri();
 
         return ResponseEntity.created(uri).build();
     }

@@ -1,10 +1,9 @@
-package com.proposta.propostaservice.biometria;
+package com.proposta.propostaservice.cartao.biometria;
 
 import com.proposta.propostaservice.cartao.Cartao;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.Base64;
 
 @Entity
 public class Biometria {

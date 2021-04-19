@@ -1,8 +1,6 @@
-package com.proposta.propostaservice.biometria;
+package com.proposta.propostaservice.cartao.biometria;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.proposta.propostaservice.proposta.Proposta;
 import com.proposta.propostaservice.proposta.PropostaResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

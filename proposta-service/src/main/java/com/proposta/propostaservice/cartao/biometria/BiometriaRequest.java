@@ -1,4 +1,4 @@
-package com.proposta.propostaservice.biometria;
+package com.proposta.propostaservice.cartao.biometria;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

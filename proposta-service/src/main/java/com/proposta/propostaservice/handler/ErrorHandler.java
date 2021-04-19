@@ -15,11 +15,22 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.util.ArrayList;
 import java.util.List;
 
 @RestControllerAdvice
 public class ErrorHandler extends ResponseEntityExceptionHandler {
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> onConstraintValidationException(ConstraintViolationException e) {
+        List<ErrorDto> error = new ArrayList<>();
+        for (ConstraintViolation violation : e.getConstraintViolations()) {
+            error.add(new ErrorDto(violation.getPropertyPath().toString(), violation.getMessage(), null));
+        }
+        return new ResponseEntity<>(error,HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(ErroApiException.class)
     public ResponseEntity<Object> handleErroApiException(ErroApiException ex){

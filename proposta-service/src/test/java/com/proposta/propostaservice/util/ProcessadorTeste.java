@@ -33,7 +33,7 @@ public class ProcessadorTeste {
                 UriComponentsBuilder.newInstance());
         Long id = propostaResponsePost.getBody().getId();
 
-        Thread.sleep(1000);
+        Thread.sleep(10000);
         processadorScheduled.gerarCartao();
         ResponseEntity<PropostaResponse> propostaResponseEntity = propostaController.buscarProposta(id);
         PropostaResponse proposta = propostaResponseEntity.getBody();

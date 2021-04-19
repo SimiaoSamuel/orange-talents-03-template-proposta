@@ -1,6 +1,6 @@
 package com.proposta.propostaservice.proposta;
 
-import com.proposta.propostaservice.biometria.ExecutorTransacao;
+import com.proposta.propostaservice.cartao.biometria.ExecutorTransacao;
 import com.proposta.propostaservice.handler.ErroApiException;
 import com.proposta.propostaservice.solicitante.SolicitacaoCartaoRequest;
 import com.proposta.propostaservice.solicitante.RestricaoCartaoResponse;

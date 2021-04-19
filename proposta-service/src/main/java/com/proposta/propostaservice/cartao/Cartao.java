@@ -21,6 +21,16 @@ public class Cartao {
     @Column(nullable = false)
     private String idProposta;
 
+    private CartaoStatus status;
+
+    public Boolean isBloqueado() {
+        return status == CartaoStatus.BLOQUEADO;
+    }
+
+    public void bloquear(){
+        status = CartaoStatus.BLOQUEADO;
+    }
+
     public String getId() {
         return id;
     }
@@ -40,6 +50,7 @@ public class Cartao {
         this.titular = titular;
         this.limite = limite;
         this.idProposta = idProposta;
+        this.status = CartaoStatus.DESBLOQUEADO;
     }
 
     /**

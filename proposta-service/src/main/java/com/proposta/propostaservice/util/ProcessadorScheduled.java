@@ -1,6 +1,6 @@
 package com.proposta.propostaservice.util;
 
-import com.proposta.propostaservice.biometria.ExecutorTransacao;
+import com.proposta.propostaservice.cartao.biometria.ExecutorTransacao;
 import com.proposta.propostaservice.cartao.Cartao;
 import com.proposta.propostaservice.cartao.CartaoFeignResource;
 import com.proposta.propostaservice.cartao.CartaoResponse;
