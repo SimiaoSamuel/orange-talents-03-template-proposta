@@ -1,7 +1,8 @@
 package com.proposta.propostaservice.proposta;
 
 import com.proposta.propostaservice.cartao.biometria.ExecutorTransacao;
-import com.proposta.propostaservice.handler.ErroApiException;
+import com.proposta.propostaservice.shared.handler.ErroApiException;
+import com.proposta.propostaservice.shared.metrics.Metrica;
 import com.proposta.propostaservice.solicitante.SolicitacaoCartaoRequest;
 import com.proposta.propostaservice.solicitante.RestricaoCartaoResponse;
 import com.proposta.propostaservice.solicitante.RestricaoCartaoFeign;
@@ -28,16 +29,19 @@ public class PropostaController {
     private final RestricaoCartaoFeign restricaoCartaoFeign;
     private final PropostaRepository propostaRepository;
     private final ExecutorTransacao transacao;
+    private final Metrica metrica;
 
-    public PropostaController(RestricaoCartaoFeign restricaoCartaoFeign, PropostaRepository propostaRepository,
-                              ExecutorTransacao transacao) {
+    public PropostaController(RestricaoCartaoFeign restricaoCartaoFeign, Metrica metrica,
+                              PropostaRepository propostaRepository, ExecutorTransacao transacao) {
         this.restricaoCartaoFeign = restricaoCartaoFeign;
         this.propostaRepository = propostaRepository;
         this.transacao = transacao;
+        this.metrica = metrica;
     }
 
     @PostMapping
-    public ResponseEntity<PropostaResponse> enviaProposta(@RequestBody @Valid PropostaRequest propostaRequest, UriComponentsBuilder uriBuilder){
+    public ResponseEntity<PropostaResponse> enviaProposta(@RequestBody @Valid PropostaRequest propostaRequest,
+                                                          UriComponentsBuilder uriBuilder){
         Proposta proposta = propostaRequest.toProposta();
         Boolean existeDocumentoIgual = propostaRepository.existsByDocumento(proposta.getDocumento());
 
@@ -55,17 +59,23 @@ public class PropostaController {
 
         PropostaResponse propostaResponse = new PropostaResponse(proposta);
 
+        metrica.adicionaPropostaPrometheus();
+
         URI uri = uriBuilder.path("propostas/{id}").buildAndExpand(propostaResponse.getId()).toUri();
         return ResponseEntity.created(uri).body(propostaResponse);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<PropostaResponse> buscarProposta(@PathVariable Long id){
+        long timeStartMetrics = System.currentTimeMillis();
+
         Optional<Proposta> proposta = propostaRepository.findById(id);
         if(proposta.isEmpty())
             throw new ErroApiException(null,"Não há nenhum recurso para essa url",HttpStatus.NOT_FOUND);
 
         PropostaResponse propostaResponse = new PropostaResponse(proposta.get());
+
+        metrica.temporizadorProposta(timeStartMetrics);
         return ResponseEntity.ok(propostaResponse);
     }
 

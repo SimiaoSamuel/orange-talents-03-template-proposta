@@ -1,4 +1,4 @@
-package com.proposta.propostaservice.handler;
+package com.proposta.propostaservice.shared.handler;
 
 import org.springframework.http.HttpStatus;
 

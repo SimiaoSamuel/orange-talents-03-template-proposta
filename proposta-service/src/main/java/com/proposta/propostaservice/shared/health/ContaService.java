@@ -1,4 +1,4 @@
-package com.proposta.propostaservice.health;
+package com.proposta.propostaservice.shared.health;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

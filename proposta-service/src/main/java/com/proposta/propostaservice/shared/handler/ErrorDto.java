@@ -1,4 +1,4 @@
-package com.proposta.propostaservice.handler;
+package com.proposta.propostaservice.shared.handler;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import org.springframework.http.HttpStatus;

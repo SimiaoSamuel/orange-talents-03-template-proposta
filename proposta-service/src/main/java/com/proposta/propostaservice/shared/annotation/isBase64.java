@@ -1,27 +1,21 @@
-package com.proposta.propostaservice.annotation;
-
-import org.hibernate.validator.constraints.CompositionType;
-import org.hibernate.validator.constraints.ConstraintComposition;
-import org.hibernate.validator.constraints.br.CNPJ;
-import org.hibernate.validator.constraints.br.CPF;
+package com.proposta.propostaservice.shared.annotation;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import javax.validation.ReportAsSingleViolation;
+import javax.validation.constraints.Pattern;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@ConstraintComposition(CompositionType.OR)
-@CPF
-@CNPJ
 @ReportAsSingleViolation
+@Pattern(regexp = "^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$")
 @Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(validatedBy = {})
-public @interface CPFOrCNPJ {
-    String message() default "CPF OU CNPJ ERRADO!";
+public @interface isBase64 {
+    String message() default "Biometria não foi enviada no formato correto";
 
     Class<?>[] groups() default { };
 

@@ -1,4 +1,4 @@
-package com.proposta.propostaservice.security;
+package com.proposta.propostaservice.shared.security;
 
 import org.keycloak.adapters.springboot.KeycloakSpringBootConfigResolver;
 import org.keycloak.adapters.springsecurity.KeycloakConfiguration;

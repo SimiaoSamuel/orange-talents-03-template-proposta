@@ -2,7 +2,7 @@ package com.proposta.propostaservice.cartao.biometria;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.proposta.propostaservice.annotation.isBase64;
+import com.proposta.propostaservice.shared.annotation.isBase64;
 import com.proposta.propostaservice.cartao.Cartao;
 
 import javax.validation.constraints.NotBlank;

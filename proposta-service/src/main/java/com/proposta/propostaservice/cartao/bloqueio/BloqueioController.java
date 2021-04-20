@@ -4,7 +4,7 @@ import com.proposta.propostaservice.cartao.Cartao;
 import com.proposta.propostaservice.cartao.CartaoFeignResource;
 import com.proposta.propostaservice.cartao.CartaoRepository;
 import com.proposta.propostaservice.cartao.biometria.ExecutorTransacao;
-import com.proposta.propostaservice.handler.ErroApiException;
+import com.proposta.propostaservice.shared.handler.ErroApiException;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

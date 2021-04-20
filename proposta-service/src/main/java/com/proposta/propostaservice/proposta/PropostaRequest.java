@@ -1,6 +1,6 @@
 package com.proposta.propostaservice.proposta;
 
-import com.proposta.propostaservice.annotation.CPFOrCNPJ;
+import com.proposta.propostaservice.shared.annotation.CPFOrCNPJ;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;

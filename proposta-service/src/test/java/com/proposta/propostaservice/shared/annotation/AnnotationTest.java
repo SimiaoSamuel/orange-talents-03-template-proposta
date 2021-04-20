@@ -1,4 +1,4 @@
-package com.proposta.propostaservice.annotation;
+package com.proposta.propostaservice.shared.annotation;
 
 import com.proposta.propostaservice.cartao.biometria.BiometriaRequest;
 import com.proposta.propostaservice.proposta.PropostaRequest;
