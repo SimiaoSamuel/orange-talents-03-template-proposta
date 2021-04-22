@@ -6,15 +6,20 @@ import com.proposta.propostaservice.shared.handler.ErroApiException;
 import com.proposta.propostaservice.shared.metrics.Metrica;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.net.URI;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/cartoes/{idCartao}/biometrias")
+@Validated
 public class BiometriaController {
 
    private final CartaoRepository cartaoRepository;
@@ -31,8 +36,9 @@ public class BiometriaController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> salvarBiometria(@PathVariable String idCartao, @RequestBody @Valid BiometriaRequest biometriaRequest,
-                                                  UriComponentsBuilder uriBuilder){
+    public ResponseEntity<Void> salvarBiometria(@PathVariable("idCartao") @NotBlank String idCartao,
+                                                @RequestBody @Valid BiometriaRequest biometriaRequest,
+                                                UriComponentsBuilder uriBuilder){
         Optional<Cartao> cartao = cartaoRepository.findById(idCartao);
         if(cartao.isEmpty())
             throw new ErroApiException(null,"cartão não encontrado", HttpStatus.NOT_FOUND);
@@ -54,4 +60,14 @@ public class BiometriaController {
         return ResponseEntity.created(uri).build();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<BiometriaResponse> retornarBiometria(@PathVariable @NotNull Long id){
+        Optional<Biometria> biometria = biometriaRepository.findById(id);
+        if(biometria.isEmpty())
+            throw new ErroApiException(null,"Erro ao procurar pela biometria",HttpStatus.NOT_FOUND);
+
+        BiometriaResponse biometriaResponse = new BiometriaResponse(biometria.get());
+
+        return ResponseEntity.ok(biometriaResponse);
+    }
 }

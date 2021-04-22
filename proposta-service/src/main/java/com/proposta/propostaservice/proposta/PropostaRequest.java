@@ -37,7 +37,9 @@ public class PropostaRequest {
      * @return A proposta com os dados do dto
      */
     public Proposta toProposta(){
-        documento = documento.replace(".","").replace("-","");
+        documento = documento.replace(".","")
+                .replace("-","").replace("/","");
+
         return new Proposta(documento,email,nome,endereco,salario);
     }
 }

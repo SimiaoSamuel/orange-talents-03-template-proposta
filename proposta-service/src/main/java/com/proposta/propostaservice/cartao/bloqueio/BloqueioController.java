@@ -8,6 +8,7 @@ import com.proposta.propostaservice.shared.handler.ErroApiException;
 import feign.FeignException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -15,12 +16,14 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import javax.validation.constraints.NotBlank;
 import java.net.URI;
 import java.util.Optional;
 import java.util.Set;
 
 @RestController
 @RequestMapping("/cartoes/{idCartao}/bloqueios")
+@Validated
 public class BloqueioController {
 
     private final CartaoRepository cartaoRepository;
@@ -28,7 +31,8 @@ public class BloqueioController {
     private final Validator validator;
     private final CartaoFeignResource cartaoFeign;
 
-    public BloqueioController(CartaoRepository cartaoRepository, ExecutorTransacao transacao, Validator validator, CartaoFeignResource cartaoFeign) {
+    public BloqueioController(CartaoRepository cartaoRepository, ExecutorTransacao transacao,
+                              Validator validator, CartaoFeignResource cartaoFeign) {
         this.cartaoRepository = cartaoRepository;
         this.transacao = transacao;
         this.validator = validator;
@@ -36,7 +40,7 @@ public class BloqueioController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> bloquearCartao(@PathVariable String idCartao,
+    public ResponseEntity<Void> bloquearCartao(@PathVariable @NotBlank String idCartao,
                                                UriComponentsBuilder uriBuilder,
                                                HttpServletRequest servlet){
         Optional<Cartao> cartao = cartaoRepository.findById(idCartao);

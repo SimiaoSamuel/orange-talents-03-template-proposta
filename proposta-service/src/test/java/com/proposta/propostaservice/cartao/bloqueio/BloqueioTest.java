@@ -2,7 +2,6 @@ package com.proposta.propostaservice.cartao.bloqueio;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.proposta.propostaservice.proposta.PropostaResponse;
-import org.junit.experimental.results.ResultMatchers;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
