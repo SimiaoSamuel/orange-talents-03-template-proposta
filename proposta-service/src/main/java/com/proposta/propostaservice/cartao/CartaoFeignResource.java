@@ -2,6 +2,8 @@ package com.proposta.propostaservice.cartao;
 
 import com.proposta.propostaservice.cartao.bloqueio.BloqueioFeignRequest;
 import com.proposta.propostaservice.cartao.bloqueio.ResultadoBloqueio;
+import com.proposta.propostaservice.cartao.viagem.AvisoRequest;
+import com.proposta.propostaservice.cartao.viagem.ResultadoAviso;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,4 +19,7 @@ public interface CartaoFeignResource {
             consumes = "application/json")
     ResultadoBloqueio bloqueiaCartaoPeloId(@PathVariable(value = "id") String id,
                                            @RequestBody BloqueioFeignRequest request);
+
+    @RequestMapping(path = "/api/cartoes/{id}/avisos", method = RequestMethod.POST, consumes = "application/json")
+    ResultadoAviso avisoCartao(@PathVariable(value = "id") String id, @RequestBody AvisoRequest avisoRequest);
 }

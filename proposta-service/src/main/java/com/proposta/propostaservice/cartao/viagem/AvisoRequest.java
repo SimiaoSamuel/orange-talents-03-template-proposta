@@ -13,14 +13,22 @@ public class AvisoRequest {
 
     @NotNull
     @FutureOrPresent
-    private LocalDate terminaEm;
+    private LocalDate validoAte;
+
+    public String getDestino() {
+        return destino;
+    }
+
+    public LocalDate getValidoAte() {
+        return validoAte;
+    }
 
     public AvisoRequest(String destino, LocalDate terminaEm) {
         this.destino = destino;
-        this.terminaEm = terminaEm;
+        this.validoAte = terminaEm;
     }
 
     public AvisoViagem toAvisoViagem(Cartao cartao, String ip, String userAgent){
-        return new AvisoViagem(cartao,destino,terminaEm,ip,userAgent);
+        return new AvisoViagem(cartao,destino, validoAte,ip,userAgent);
     }
 }
