@@ -4,6 +4,8 @@ import com.proposta.propostaservice.cartao.Cartao;
 import com.proposta.propostaservice.cartao.CartaoRepository;
 import com.proposta.propostaservice.shared.handler.ErroApiException;
 import com.proposta.propostaservice.shared.metrics.Metrica;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -11,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.net.URI;
@@ -26,19 +27,26 @@ public class BiometriaController {
    private final ExecutorTransacao transacao;
    private final Metrica metrica;
    private final BiometriaRepository biometriaRepository;
+   private final Tracer tracer;
 
     public BiometriaController(CartaoRepository cartaoRepository, ExecutorTransacao transacao,
-                               Metrica metrica, BiometriaRepository biometriaRepository) {
+                               Metrica metrica, BiometriaRepository biometriaRepository, Tracer tracer) {
         this.cartaoRepository = cartaoRepository;
         this.transacao = transacao;
         this.metrica = metrica;
         this.biometriaRepository = biometriaRepository;
+        this.tracer = tracer;
     }
 
     @PostMapping
     public ResponseEntity<Void> salvarBiometria(@PathVariable("idCartao") @NotBlank String idCartao,
                                                 @RequestBody @Valid BiometriaRequest biometriaRequest,
                                                 UriComponentsBuilder uriBuilder){
+        Span span = tracer.activeSpan();
+        span.setTag("cartao.biometria",idCartao);
+
+        span.log("tentativa de salvar uma biometria para um cartão");
+
         Optional<Cartao> cartao = cartaoRepository.findById(idCartao);
         if(cartao.isEmpty())
             throw new ErroApiException(null,"cartão não encontrado", HttpStatus.NOT_FOUND);

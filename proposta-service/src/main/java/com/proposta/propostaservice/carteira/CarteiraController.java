@@ -6,6 +6,8 @@ import com.proposta.propostaservice.cartao.CartaoRepository;
 import com.proposta.propostaservice.cartao.biometria.ExecutorTransacao;
 import com.proposta.propostaservice.shared.handler.ErroApiException;
 import feign.FeignException;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -26,18 +28,25 @@ public class CarteiraController {
     private final CartaoRepository cartaoRepository;
     private final ExecutorTransacao transacao;
     private final CarteiraRepository carteiraRepository;
+    private final Tracer tracer;
 
-    public CarteiraController(CartaoFeignResource feign, CartaoRepository cartaoRepository, ExecutorTransacao transacao, CarteiraRepository carteiraRepository) {
+    public CarteiraController(CartaoFeignResource feign, CartaoRepository cartaoRepository, ExecutorTransacao transacao, CarteiraRepository carteiraRepository, Tracer tracer) {
         this.feign = feign;
         this.cartaoRepository = cartaoRepository;
         this.transacao = transacao;
         this.carteiraRepository = carteiraRepository;
+        this.tracer = tracer;
     }
 
     @PostMapping
     public ResponseEntity<Void> salvaCarteira(@PathVariable @NotBlank String idCartao,
                                               @RequestBody @Valid CarteiraRequest carteiraRequest,
                                               UriComponentsBuilder uriBuilder) {
+        Span span = tracer.activeSpan();
+        span.setTag("cartao.carteira",idCartao);
+
+        span.log("tentativa de associar uma carteira a um cartao");
+
         Optional<Cartao> cartaoDB = cartaoRepository.findById(idCartao);
 
         if (cartaoDB.isEmpty())

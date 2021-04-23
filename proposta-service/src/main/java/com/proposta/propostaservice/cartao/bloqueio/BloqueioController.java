@@ -6,6 +6,8 @@ import com.proposta.propostaservice.cartao.CartaoRepository;
 import com.proposta.propostaservice.cartao.biometria.ExecutorTransacao;
 import com.proposta.propostaservice.shared.handler.ErroApiException;
 import feign.FeignException;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -31,18 +33,24 @@ public class BloqueioController {
     private final Validator validator;
     private final CartaoFeignResource cartaoFeign;
 
+    private final Tracer tracer;
+
     public BloqueioController(CartaoRepository cartaoRepository, ExecutorTransacao transacao,
-                              Validator validator, CartaoFeignResource cartaoFeign) {
+                              Validator validator, CartaoFeignResource cartaoFeign, Tracer tracer) {
         this.cartaoRepository = cartaoRepository;
         this.transacao = transacao;
         this.validator = validator;
         this.cartaoFeign = cartaoFeign;
+        this.tracer = tracer;
     }
 
     @PostMapping
     public ResponseEntity<Void> bloquearCartao(@PathVariable @NotBlank String idCartao,
                                                UriComponentsBuilder uriBuilder,
                                                HttpServletRequest servlet){
+        Span span = tracer.activeSpan();
+        span.setTag("cartao.bloqueio", idCartao);
+
         Optional<Cartao> cartao = cartaoRepository.findById(idCartao);
 
         if(cartao.isEmpty())

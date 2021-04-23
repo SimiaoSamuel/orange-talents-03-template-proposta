@@ -6,8 +6,8 @@ import com.proposta.propostaservice.cartao.CartaoRepository;
 import com.proposta.propostaservice.cartao.biometria.ExecutorTransacao;
 import com.proposta.propostaservice.shared.handler.ErroApiException;
 import feign.FeignException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -28,11 +28,13 @@ public class AvisoController {
     private final CartaoRepository cartaoRepository;
     private final ExecutorTransacao transacao;
     private final CartaoFeignResource feign;
+    private final Tracer tracer;
 
-    public AvisoController(CartaoRepository cartaoRepository, ExecutorTransacao transacao, CartaoFeignResource feign) {
+    public AvisoController(CartaoRepository cartaoRepository, ExecutorTransacao transacao, CartaoFeignResource feign, Tracer tracer) {
         this.cartaoRepository = cartaoRepository;
         this.transacao = transacao;
         this.feign = feign;
+        this.tracer = tracer;
     }
 
     @PostMapping
@@ -40,6 +42,11 @@ public class AvisoController {
                                             @PathVariable @NotBlank String idCartao,
                                             HttpServletRequest request,
                                             UriComponentsBuilder uriBuilder){
+        Span span = tracer.activeSpan();
+        span.setTag("cartao.viagem",idCartao);
+
+        span.log("tentativa de criar um aviso de viagem");
+
         Optional<Cartao> cartaoDB = cartaoRepository.findById(idCartao);
 
         if(cartaoDB.isEmpty())

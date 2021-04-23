@@ -8,6 +8,8 @@ import com.proposta.propostaservice.solicitante.RestricaoCartaoResponse;
 import com.proposta.propostaservice.solicitante.RestricaoCartaoFeign;
 import com.proposta.propostaservice.util.OfuscamentoUtil;
 import feign.FeignException;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,13 +32,15 @@ public class PropostaController {
     private final PropostaRepository propostaRepository;
     private final ExecutorTransacao transacao;
     private final Metrica metrica;
+    private final Tracer tracer;
 
     public PropostaController(RestricaoCartaoFeign restricaoCartaoFeign, Metrica metrica,
-                              PropostaRepository propostaRepository, ExecutorTransacao transacao) {
+                              PropostaRepository propostaRepository, ExecutorTransacao transacao, Tracer tracer) {
         this.restricaoCartaoFeign = restricaoCartaoFeign;
         this.propostaRepository = propostaRepository;
         this.transacao = transacao;
         this.metrica = metrica;
+        this.tracer = tracer;
     }
 
     @PostMapping
@@ -44,6 +48,11 @@ public class PropostaController {
                                                           UriComponentsBuilder uriBuilder){
         Proposta proposta = propostaRequest.toProposta();
         Boolean existeDocumentoIgual = propostaRepository.existsByDocumento(proposta.getDocumento());
+
+        Span span = tracer.activeSpan();
+        span.setTag("Proposta.documento",proposta.getDocumento());
+
+        span.log("criação de uma proposta");
 
         if(existeDocumentoIgual)
             throw new ErroApiException("documento","Esse documento já está cadastrado em uma proposta",

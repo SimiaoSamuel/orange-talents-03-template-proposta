@@ -33,6 +33,7 @@ services:
       CARTAO_RESTRICAO: http://analise:9999
       CARTAO_CRIACAO: http://contas:8888
       KEYCLOAK_AUTH_SERVER_URL: http://keycloak:8080/auth
+      OPENTRACING_JAEGER_HTTP_SENDER_URL: http://jaeger:14268/api/traces
 
   zookeeper:
     image: "confluentinc/cp-zookeeper:5.2.1"
