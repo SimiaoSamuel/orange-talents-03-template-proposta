@@ -4,6 +4,8 @@ import com.proposta.propostaservice.cartao.bloqueio.BloqueioFeignRequest;
 import com.proposta.propostaservice.cartao.bloqueio.ResultadoBloqueio;
 import com.proposta.propostaservice.cartao.viagem.AvisoRequest;
 import com.proposta.propostaservice.cartao.viagem.ResultadoAviso;
+import com.proposta.propostaservice.carteira.CarteiraFeignResponse;
+import com.proposta.propostaservice.carteira.CarteiraRequest;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,11 @@ public interface CartaoFeignResource {
     ResultadoBloqueio bloqueiaCartaoPeloId(@PathVariable(value = "id") String id,
                                            @RequestBody BloqueioFeignRequest request);
 
-    @RequestMapping(path = "/api/cartoes/{id}/avisos", method = RequestMethod.POST, consumes = "application/json")
+    @RequestMapping(path = "/api/cartoes/{id}/avisos", method = RequestMethod.POST,
+            consumes = "application/json")
     ResultadoAviso avisoCartao(@PathVariable(value = "id") String id, @RequestBody AvisoRequest avisoRequest);
+
+    @RequestMapping(path = "/api/cartoes/{id}/carteiras", method = RequestMethod.POST,
+            consumes = "application/json")
+    CarteiraFeignResponse associandoCarteira(@PathVariable(value = "id") String id, @RequestBody CarteiraRequest carteiraRequest);
 }
