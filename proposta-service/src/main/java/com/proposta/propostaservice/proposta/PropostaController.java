@@ -15,11 +15,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.encrypt.TextEncryptor;
+import org.springframework.security.crypto.keygen.KeyGenerators;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.crypto.KeyGenerator;
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -45,26 +52,30 @@ public class PropostaController {
 
     @PostMapping
     public ResponseEntity<PropostaResponse> enviaProposta(@RequestBody @Valid PropostaRequest propostaRequest,
-                                                          UriComponentsBuilder uriBuilder){
+                                                          UriComponentsBuilder uriBuilder) {
         Proposta proposta = propostaRequest.toProposta();
-        Boolean existeDocumentoIgual = propostaRepository.existsByDocumento(proposta.getDocumento());
+        List<Proposta> propostasDB = propostaRepository.findAll();
+
+        propostasDB.forEach(p -> {
+            boolean documentoIgual = p.getDocumento().equals(propostaRequest.getDocumento());
+            if (documentoIgual)
+                throw new ErroApiException("documento", "Esse documento já está cadastrado em uma proposta",
+                        HttpStatus.UNPROCESSABLE_ENTITY);
+        });
 
         Span span = tracer.activeSpan();
-        span.setTag("Proposta.documento",proposta.getDocumento());
+        if (span != null) {
+            span.setTag("Proposta.documento", proposta.getDocumento());
+            span.log("criação de uma proposta");
+        }
 
-        span.log("criação de uma proposta");
-
-        if(existeDocumentoIgual)
-            throw new ErroApiException("documento","Esse documento já está cadastrado em uma proposta",
-                    HttpStatus.UNPROCESSABLE_ENTITY);
 
         transacao.salvaEComita(proposta);
         solicitacaoParaValidarDados(proposta);
 
         String emailOfuscado = OfuscamentoUtil.Ofuscar(proposta.getEmail());
-        String documento = OfuscamentoUtil.Ofuscar(proposta.getDocumento());
-        LOG.info("Proposta com email: {} documento: {} status:{} criada com sucesso!",emailOfuscado
-                ,documento, proposta.getStatusProposta());
+        LOG.info("Proposta com email: {} documento: {} status:{} criada com sucesso!", emailOfuscado
+                , proposta.getDocumento(), proposta.getStatusProposta());
 
         PropostaResponse propostaResponse = new PropostaResponse(proposta);
 
@@ -75,12 +86,12 @@ public class PropostaController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PropostaResponse> buscarProposta(@PathVariable Long id){
+    public ResponseEntity<PropostaResponse> buscarProposta(@PathVariable Long id) {
         long timeStartMetrics = System.currentTimeMillis();
 
         Optional<Proposta> proposta = propostaRepository.findById(id);
-        if(proposta.isEmpty())
-            throw new ErroApiException(null,"Não há nenhum recurso para essa url",HttpStatus.NOT_FOUND);
+        if (proposta.isEmpty())
+            throw new ErroApiException(null, "Não há nenhum recurso para essa url", HttpStatus.NOT_FOUND);
 
         PropostaResponse propostaResponse = new PropostaResponse(proposta.get());
 
@@ -88,14 +99,15 @@ public class PropostaController {
         return ResponseEntity.ok(propostaResponse);
     }
 
-    public void solicitacaoParaValidarDados(Proposta proposta){
+    public void solicitacaoParaValidarDados(Proposta proposta) {
         SolicitacaoCartaoRequest requestCartao = new SolicitacaoCartaoRequest(proposta);
         try {
-            RestricaoCartaoResponse dadosCartao = restricaoCartaoFeign.retornaDadosSolicitante(requestCartao);
+            RestricaoCartaoResponse dadosCartao = restricaoCartaoFeign
+                    .retornaDadosSolicitante(requestCartao);
             proposta.statusValido();
             transacao.atualizaEComita(proposta);
-        } catch (FeignException e){
-            LOG.error("[{}] during [POST] to [http://localhost:9999/api/solicitacao]",e.status());
+        } catch (FeignException e) {
+            LOG.error("[{}] during [POST] to [http://localhost:9999/api/solicitacao]", e.status());
             LOG.warn("O estado dessa proposta é NÃO_ELEGÍVEL");
         }
     }

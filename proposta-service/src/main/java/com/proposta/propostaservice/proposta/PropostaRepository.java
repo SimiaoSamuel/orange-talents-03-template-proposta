@@ -7,4 +7,5 @@ import java.util.List;
 public interface PropostaRepository extends JpaRepository<Proposta, Long> {
     Boolean existsByDocumento(String documento);
     List<Proposta> findByStatusProposta(StatusProposta status);
+    List<Proposta> findAllByEmail(String email);
 }

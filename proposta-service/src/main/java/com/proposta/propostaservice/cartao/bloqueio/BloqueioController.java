@@ -47,31 +47,34 @@ public class BloqueioController {
     @PostMapping
     public ResponseEntity<Void> bloquearCartao(@PathVariable @NotBlank String idCartao,
                                                UriComponentsBuilder uriBuilder,
-                                               HttpServletRequest servlet){
+                                               HttpServletRequest servlet) {
         Span span = tracer.activeSpan();
-        span.setTag("cartao.bloqueio", idCartao);
+        if (span != null) {
+            span.setTag("cartao.bloqueio", idCartao);
+            span.log("tentativa de bloquear o cartão");
+        }
 
         Optional<Cartao> cartao = cartaoRepository.findById(idCartao);
 
-        if(cartao.isEmpty())
-            throw new ErroApiException(null,"Requisição inválida", HttpStatus.NOT_FOUND);
+        if (cartao.isEmpty())
+            throw new ErroApiException(null, "Requisição inválida", HttpStatus.NOT_FOUND);
 
         Cartao cartaoEntity = cartao.get();
 
-        if(cartaoEntity.isBloqueado())
-            throw new ErroApiException(null,"Cartão já está bloqueado", HttpStatus.UNPROCESSABLE_ENTITY);
+        if (cartaoEntity.isBloqueado())
+            throw new ErroApiException(null, "Cartão já está bloqueado", HttpStatus.UNPROCESSABLE_ENTITY);
 
         BloqueioRequest bloqueioRequest = new BloqueioRequest(servlet.getRemoteAddr(),
                 servlet.getHeader("User-Agent"));
         Set<ConstraintViolation<BloqueioRequest>> errors = validator.validate(bloqueioRequest);
 
-        if(!errors.isEmpty())
+        if (!errors.isEmpty())
             throw new ConstraintViolationException(errors);
 
         try {
             cartaoFeign.bloqueiaCartaoPeloId(idCartao, new BloqueioFeignRequest("proposta-service"));
-        } catch (FeignException e){
-            throw new ErroApiException(null,"Não foi possível bloquear seu cartão", HttpStatus.UNPROCESSABLE_ENTITY);
+        } catch (FeignException e) {
+            throw new ErroApiException(null, "Não foi possível bloquear seu cartão", HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         BloqueioCartao bloqueio = bloqueioRequest.toBloqueioCartao(cartaoEntity);

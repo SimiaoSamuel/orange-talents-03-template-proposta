@@ -43,9 +43,10 @@ public class CarteiraController {
                                               @RequestBody @Valid CarteiraRequest carteiraRequest,
                                               UriComponentsBuilder uriBuilder) {
         Span span = tracer.activeSpan();
-        span.setTag("cartao.carteira",idCartao);
-
-        span.log("tentativa de associar uma carteira a um cartao");
+        if (span != null) {
+            span.setTag("cartao.carteira", idCartao);
+            span.log("tentativa de associar uma carteira a um cartao");
+        }
 
         Optional<Cartao> cartaoDB = cartaoRepository.findById(idCartao);
 
@@ -55,7 +56,7 @@ public class CarteiraController {
         Optional<Carteira> carteiraDB = carteiraRepository.findByCartaoAndPagamento(cartaoDB.get(),
                 GatewayPagamento.valueOf(carteiraRequest.getCarteira()));
 
-        if(carteiraDB.isPresent())
+        if (carteiraDB.isPresent())
             throw new ErroApiException(null, "Erro ao associar carteira informada", HttpStatus.UNPROCESSABLE_ENTITY);
 
         CarteiraFeignResponse carteiraFeignResponse;

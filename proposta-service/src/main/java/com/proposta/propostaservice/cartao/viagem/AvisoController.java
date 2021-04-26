@@ -41,21 +41,22 @@ public class AvisoController {
     public ResponseEntity<Void> enviarAviso(@RequestBody @Valid AvisoRequest avisoRequest,
                                             @PathVariable @NotBlank String idCartao,
                                             HttpServletRequest request,
-                                            UriComponentsBuilder uriBuilder){
+                                            UriComponentsBuilder uriBuilder) {
         Span span = tracer.activeSpan();
-        span.setTag("cartao.viagem",idCartao);
-
-        span.log("tentativa de criar um aviso de viagem");
+        if (span != null) {
+            span.setTag("cartao.viagem", idCartao);
+            span.log("tentativa de criar um aviso de viagem");
+        }
 
         Optional<Cartao> cartaoDB = cartaoRepository.findById(idCartao);
 
-        if(cartaoDB.isEmpty())
-            throw new ErroApiException(null,"Erro relacionado ao cartão", HttpStatus.NOT_FOUND);
+        if (cartaoDB.isEmpty())
+            throw new ErroApiException(null, "Erro relacionado ao cartão", HttpStatus.NOT_FOUND);
 
-        try{
-            feign.avisoCartao(idCartao,avisoRequest);
-        } catch (FeignException ex){
-            throw new ErroApiException(null,"Não foi possível cadastrar o aviso",HttpStatus.UNPROCESSABLE_ENTITY);
+        try {
+            feign.avisoCartao(idCartao, avisoRequest);
+        } catch (FeignException ex) {
+            throw new ErroApiException(null, "Não foi possível cadastrar o aviso", HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
         AvisoViagem avisoViagem = avisoRequest.toAvisoViagem(cartaoDB.get(), request.getRemoteAddr(),

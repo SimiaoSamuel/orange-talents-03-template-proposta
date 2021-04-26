@@ -1,6 +1,8 @@
 package com.proposta.propostaservice.proposta;
 
 import com.proposta.propostaservice.shared.annotation.CPFOrCNPJ;
+import org.springframework.security.crypto.encrypt.Encryptors;
+import org.springframework.security.crypto.password.Pbkdf2PasswordEncoder;
 
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
@@ -32,6 +34,10 @@ public class PropostaRequest {
         this.salario = salario;
     }
 
+    public String getDocumento() {
+        return documento;
+    }
+
     /**
      * Converte esse dto para uma proposta
      * @return A proposta com os dados do dto
@@ -40,6 +46,7 @@ public class PropostaRequest {
         documento = documento.replace(".","")
                 .replace("-","").replace("/","");
 
-        return new Proposta(documento,email,nome,endereco,salario);
+        String docEncrypt = Encryptors.text("secret", "1c68578e74dc3ff8").encrypt(documento);
+        return new Proposta(docEncrypt,email,nome,endereco,salario);
     }
 }

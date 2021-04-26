@@ -1,6 +1,7 @@
 package com.proposta.propostaservice.proposta;
 
 import com.proposta.propostaservice.cartao.Cartao;
+import org.springframework.security.crypto.encrypt.Encryptors;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -46,7 +47,7 @@ public class Proposta {
     }
 
     public String getDocumento() {
-        return documento;
+        return Encryptors.text("secret", "1c68578e74dc3ff8").decrypt(documento);
     }
 
     public String getEmail() {
